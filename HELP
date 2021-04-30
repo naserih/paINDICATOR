@@ -1,0 +1,192 @@
+(300a, 0010)  Dose Reference Sequence   1 item(s) ---- 
+    (300a, 0018) Dose Reference Point Coordinates DS: ['-3.3651847024415', '162.738341563199', '-656.1873016909']
+
+(300a, 0070)  Fraction Group Sequence   1 item(s) ---- 
+    (300c, 0004)  Referenced Beam Sequence   6 item(s) ---- 
+        (300a, 0082) Beam Dose Specification Point       DS: ['-3.3651847024415', '162.738341563199', '-656.1873016909']
+
+(300a, 00b0)  Beam Sequence   6 item(s) ---- 
+    (300a, 0111)  Control Point Sequence   2 item(s) ---- 
+        (300a, 012c) Isocenter Position                  DS: ['-3.3651847024415', '147.297073690234', '-657']
+    (300a, 0111)  Control Point Sequence   2 item(s) ---- 
+        (300a, 012c) Isocenter Position                  DS: ['-3.3651847024415', '147.297073690234', '-657']
+
+RT_PLAN TAGS:
+
+(0018, 1000)
+(0020, 1040)
+(300a, 0002)
+(300a, 0003)
+(300e, 0004)
+(0008, 0005)
+(300a, 0006)
+(300a, 0007)
+(300a, 0040)
+(300a, 000a)
+(300a, 000c)
+(0020, 000d)
+(0020, 000e)
+(3253, 1002)
+(0008, 1010)
+(0020, 0011)
+(0008, 0012)
+(0008, 0013)
+(0008, 0016)
+(0008, 0018)
+(300e, 0005)
+(0008, 0020)
+(0008, 0070)
+(3253, 1001)
+(0008, 0030)
+(300a, 0070)
+(300a, 00b0)
+(300a, 0010)
+(0008, 1030)
+(300e, 0008)
+(0010, 0032)
+(0008, 103e)
+(3253, 0010)
+(0010, 0040)
+(0010, 0020)
+(300e, 0002)
+(0010, 0030)
+(0018, 1020)
+(0008, 1048)
+(300c, 0060)
+(3287, 0010)
+(0008, 0050)
+(0010, 2160)
+(0020, 0052)
+(300a, 0180)
+(0008, 0060)
+(0008, 0090)
+(3253, 1000)
+(0010, 0010)
+(0008, 1090)
+(0008, 1070)
+(3287, 1000)
+(0020, 0010)
+
+
+['AccessionNumber', 'ApprovalStatus', 'BeamSequence', 'DeviceSerialNumber', 'DoseReferenceSequence', 'EthnicGroup', 'FractionGroupSequence', 'FrameOfReferenceUID', 'InstanceCreationDate', 'InstanceCreationTime', 'Manufacturer', 'ManufacturerModelName', 'Modality', 'OperatorsName', 'PatientBirthDate', 'PatientBirthTime', 'PatientID', 'PatientName', 'PatientSetupSequence', 'PatientSex', 'PhysiciansOfRecord', 'PlanIntent', 'PositionReferenceIndicator', 'RTPlanDate', 'RTPlanGeometry', 'RTPlanLabel', 'RTPlanName', 'RTPlanTime', 'ReferencedStructureSetSequence', 'ReferringPhysicianName', 'ReviewDate', 'ReviewTime', 'ReviewerName', 'SOPClassUID', 'SOPInstanceUID', 'SeriesDescription', 'SeriesInstanceUID', 'SeriesNumber', 'SoftwareVersions', 'SpecificCharacterSet', 'StationName', 'StudyDate', 'StudyDescription', 'StudyID', 'StudyInstanceUID', 'StudyTime', 'ToleranceTableSequence']
+
+
+
+------------
+
+Make_Contour_From_directory()
+Make_array(PathDicom)
+
+    lstFilesDCM
+    Dicom_info
+    all_RTs
+    self.ds >> file read in pydicom
+    s_rois_in_case
+    self.RS_struct = pydicom.read_file(self.lstRSFile)
+    (0x3006, 0x020) StructureSetROISequence
+    (0x3006, 0x080) RTROIObservationsSequence
+    self.ROI_Structure = self.RS_struct.StructureSetROISequence
+
+
+    self.Contour_Names
+
+    self.ArrayDicom = sitk.GetArrayFromImage(self.dicom_handle)
+    elf.reader = sitk.ImageSeriesReader()
+    self.dicom_handle = self.reader.Execute()
+
+get_mask()
+
+
+
+SP 50
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CU 50
+Linear SVM , 0.7575757575757576 , 10 , 15 , 3 , 5
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Random Forest , 0.7878787878787878 , 9 , 16 , 2 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Neural Net , 0.7575757575757576 , 11 , 15 , 3 , 4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CY 50
+Linear SVM , 0.7272727272727273 , 11 , 13 , 5 , 4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Neural Net , 0.8181818181818182 , 12 , 14 , 4 , 3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+SP 50
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/var/www/devDocuments/hossein/p2env/lib/python2.7/site-packages/sklearn/discriminant_analysis.py:692: UserWarning: Variables are collinear
+  warnings.warn("Variables are collinear")
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SP 30
+Linear SVM , 0.7575757575757576 , 11 , 14 , 4 , 4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CU 50
+Linear SVM , 0.7575757575757576 , 10 , 15 , 3 , 5
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Neural Net , 0.7878787878787878 , 11 , 13 , 5 , 4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CU 30
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CY 50
+Linear SVM , 0.7272727272727273 , 11 , 13 , 5 , 4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Decision Tree , 0.7272727272727273 , 8 , 13 , 5 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Random Forest , 0.7272727272727273 , 9 , 14 , 4 , 6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Neural Net , 0.7575757575757576 , 12 , 15 , 3 , 3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CY 3050
+Random Forest , 0.7272727272727273 , 10 , 13 , 5 , 5
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Naive Bayes , 0.7272727272727273 , 8 , 16 , 2 , 7
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[Finished in 21.2s]
+
+
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+/var/www/devDocuments/hossein/p2env/lib/python2.7/site-packages/sklearn/discriminant_analysis.py:692: UserWarning: Variables are collinear
+  warnings.warn("Variables are collinear")
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+SP 30
+Linear SVM , 0.7575757575757576 , 11 , 14 , 4 , 4
+Decision Tree , 0.7272727272727273 , 13 , 10 , 8 , 2
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+CU 50
+Linear SVM , 0.7575757575757576 , 10 , 15 , 3 , 5
+Random Forest , 0.7272727272727273 , 10 , 12 , 6 , 5
+Neural Net , 0.7575757575757576 , 11 , 13 , 5 , 4
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+QDA , 0.7272727272727273 , 9 , 15 , 3 , 6
+CU 30
+Naive Bayes , 0.7272727272727273 , 9 , 15 , 3 , 6
+CY 50
+Linear SVM , 0.7272727272727273 , 11 , 13 , 5 , 4
+Neural Net , 0.7878787878787878 , 11 , 15 , 3 , 4
+Naive Bayes , 0.7575757575757576 , 8 , 17 , 1 , 7
+CY 3050
+Naive Bayes , 0.7272727272727273 , 8 , 16 , 2 , 7
+[Finished in 19.3s]
+

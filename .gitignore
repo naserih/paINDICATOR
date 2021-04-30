@@ -1,0 +1,16 @@
+env
+venv
+venv3
+env.py
+data
+data/
+/data
+points/
+points
+/points
+
+*.pdf
+*.pyc
+*.doc
+*.docx
+*.dcm

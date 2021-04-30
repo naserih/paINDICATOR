@@ -1,0 +1,21 @@
+# radiomics_requirements.txt for python 2.7
+subprocess.run
+numpy==1.16.6
+pyradiomics
+#pyradiomics==2.2.0
+pyzmq==17.1.1
+#voila
+jupyterlab
+#Cython==0.29.14
+#jupyter==1.0.0
+pydicom
+matplotlib
+ipywidgets
+pandas
+scipy
+dcmrtstruct2nii
+dicompyler-core
+pydicom
+pynrrd
+Pillow
+Shapely==1.6.4
