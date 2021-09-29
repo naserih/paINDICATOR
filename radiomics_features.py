@@ -5,14 +5,22 @@ from distutils.version import LooseVersion
 import SimpleITK as sitk
 from plot_nrrd import plot_nrrd
 import nrrd
-from convert_dicom2nrrd import simple_plot_nrrd
+from dicom2nrrd import simple_plot_nrrd
 from radiomics import featureextractor, firstorder, getTestCase, glcm, glrlm, glszm, ngtdm,gldm,  imageoperations, shape
 import matplotlib.pyplot as plt
-import six, numpy as np
+import numpy as np
+import six
 import os
-import dicom2nrrd_convertor
+import dicom2nrrd
 import csv
 import random 
+from dotenv import load_dotenv
+load_dotenv()
+
+DATA_CACHE_PATH_OUT = os.environ.get("DATA_CACHE_PATH")
+if not os.path.exists(DATA_CACHE_PATH_OUT):
+    os.makedirs(DATA_CACHE_PATH_OUT)
+
 
 def check_requirements():
     # check that all packages are installed (see requirements.txt file)
@@ -134,9 +142,7 @@ def old_radiomics():
     mask_array = None
     image_array - None
 
-def features_extractor(patients_nrrd_path, valid_IDs):
-    applyLog = False
-    applyWavelet = False
+def features_extractor(patients_nrrd_path, valid_IDs, applyLog = False, applyWavelet = False):
     feature_vectors = {}
     cnt = 0
     for case_id in valid_IDs:
@@ -353,12 +359,12 @@ def features_extractor(patients_nrrd_path, valid_IDs):
         # Show FirstOrder features, calculated on a LoG filtered image
         #
         if applyLog:
-          sigmaValues = numpy.arange(5., 0., -.5)[::1]
+          sigmaValues = np.arange(5., 0., -.5)[::1]
           for logImage, imageTypeName, inputKwargs in imageoperations.getLoGImage(image, mask, sigma=sigmaValues):
             logFirstorderFeatures = firstorder.RadiomicsFirstOrder(logImage, mask, **inputKwargs)
             logFirstorderFeatures.enableAllFeatures()
             results = logFirstorderFeatures.execute()
-            for (key, val) in six.iteritems(results):
+            for (key, val) in np.iteritems(results):
                 laplacianFeatureName = '%s_%s' % (imageTypeName, key)
                 if laplacianFeatureName not in feature_vectors[case_id]:
                     feature_vectors[case_id][laplacianFeatureName] = val
@@ -393,11 +399,9 @@ def features_extractor(patients_nrrd_path, valid_IDs):
 # using dicom2nrrd_convertor to convert dicom to nrrd
 # patients_dicom_path = "/mnt/iDriveShare/hossein/2_patientData/IMAGES"
 
-def extractor(image_array, mask_array):
-    applyLog = False
-    applyWavelet = False
+def extractor(image_array, mask_array, applyLog = False,applyWavelet = False ):
     feature_vectors = {}
-    cache_file = '/var/www/devDocuments/hossein/Galenus/data/cache_%s.nrrd'%random.random()
+    cache_file = os.path.join(DATA_CACHE_PATH_OUT,'cache_%s.nrrd'%random.random())
     nrrd.write(cache_file, image_array)
     image = sitk.ReadImage(cache_file)
     nrrd.write(cache_file, mask_array)
@@ -416,17 +420,17 @@ def extractor(image_array, mask_array):
     #   mask = correctedMask
     # image, mask = imageoperations.cropToTumorMask(image, mask, bb)
     
-    firstOrderFeatures = firstorder.RadiomicsFirstOrder(image, mask, **settings)
-    # firstOrderFeatures.enableFeatureByName('Mean', True)
-    firstOrderFeatures.enableAllFeatures()
+    features = firstorder.RadiomicsFirstOrder(image, mask, **settings)
+    # features.enableFeatureByName('Mean', True)
+    features.enableAllFeatures()
 
     # print('Will calculate the following first order features: ')
-    # for f in firstOrderFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(firstOrderFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating first order features...')
-    results = firstOrderFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated first order features: ')
@@ -438,21 +442,21 @@ def extractor(image_array, mask_array):
             print('Error: firstOrder key existing! %s'%firstOrderFeatureName)
             # break
         # print('  ', key, ':', val)
-
+    print('ADDED %s first Order Features'%len(results))
     #
     # Show Shape features
     #
 
-    shapeFeatures = shape.RadiomicsShape(image, mask, **settings)
-    shapeFeatures.enableAllFeatures()
+    features = shape.RadiomicsShape(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following Shape features: ')
-    # for f in shapeFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(shapeFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating Shape features...')
-    results = shapeFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated Shape features: ')
@@ -464,20 +468,20 @@ def extractor(image_array, mask_array):
             print('Error: shape key existing! %s'%ShapeFeatureName)
             # break
         # print('  ', key, ':', val)
-
+    print('ADDED %s shape Features'%len(results))
     #
     # Show GLCM features: Gray Level Co-occurrence Matrix (GLCM) Features
     #
-    glcmFeatures = glcm.RadiomicsGLCM(image, mask, **settings)
-    glcmFeatures.enableAllFeatures()
+    features = glcm.RadiomicsGLCM(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following GLCM features: ')
-    # for f in glcmFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(glcmFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating GLCM features...')
-    results = glcmFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated GLCM features: ')
@@ -491,21 +495,20 @@ def extractor(image_array, mask_array):
         # print('  ', key, ':', val)
 
 
-
+    print('ADDED %s GLCM Features'%len(results))
     #
     # Show GLSZM features; Gray Level Size Zone Matrix (GLSZM) Features
     #
-    glszmFeatures = glszm.RadiomicsGLSZM(image, mask, **settings)
-    glszmFeatures.enableAllFeatures()
+    features = glszm.RadiomicsGLSZM(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following GLSZM features: ')
-    # for f in glszmFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(glszmFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating GLSZM features...')
-    results = glszmFeatures.execute()
-    print('done')
+    results = features.execute()
 
     # print('Calculated GLSZM features: ')
     for (key, val) in six.iteritems(results):
@@ -516,21 +519,21 @@ def extractor(image_array, mask_array):
             print('Error: GLSZM key existing! %s'%GLSZMFeatureName)
             # break
         # print('  ', key, ':', val)
-
+    print('ADDED %s GLSZ Features'%len(results))
 
     #
     # Show GLRLM features; Gray Level Run Length Matrix (GLRLM) Features
     #
-    glrlmFeatures = glrlm.RadiomicsGLRLM(image, mask, **settings)
-    glrlmFeatures.enableAllFeatures()
+    features = glrlm.RadiomicsGLRLM(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following GLRLM features: ')
-    # for f in glrlmFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(glrlmFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating GLRLM features...')
-    results = glrlmFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated GLRLM features: ')
@@ -542,20 +545,20 @@ def extractor(image_array, mask_array):
             print('Error: GLRLM key existing! %s'%GLRLMFeatureName)
             # break
         # print('  ', key, ':', val)
-
+    print('ADDED %s GLRM Features'%len(results))
     #
     # Show NGTDM features; Neighbouring Gray Tone Difference Matrix (NGTDM) Features
     #
-    ngtdmFeatures = ngtdm.RadiomicsNGTDM(image, mask, **settings)
-    ngtdmFeatures.enableAllFeatures()
+    features = ngtdm.RadiomicsNGTDM(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following NGTDM features: ')
-    # for f in ngtdmFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(ngtdmFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating NGTDM features...')
-    results = ngtdmFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated NGTDM features: ')
@@ -567,20 +570,20 @@ def extractor(image_array, mask_array):
             print('Error: NGTDM key existing! %s'%NGTDMFeatureName)
             # break
         # print('  ', key, ':', val)
-
+    print('ADDED %s NGTDM Features'%len(results))
     #
     # Show GLDM features; Gray Level Dependence Matrix (GLDM) Features
     #
-    gldmFeatures = gldm.RadiomicsGLDM(image, mask, **settings)
-    gldmFeatures.enableAllFeatures()
+    features = gldm.RadiomicsGLDM(image, mask, **settings)
+    features.enableAllFeatures()
 
     # print('Will calculate the following GLDM features: ')
-    # for f in gldmFeatures.enabledFeatures.keys():
+    # for f in features.enabledFeatures.keys():
     #   print('  ', f)
-    #   print(getattr(gldmFeatures, 'get%sFeatureValue' % f).__doc__)
+    #   print(getattr(features, 'get%sFeatureValue' % f).__doc__)
 
     # print('Calculating GLDM features...')
-    results = gldmFeatures.execute()
+    results = features.execute()
     # print('done')
 
     # print('Calculated GLDM features: ')
@@ -593,16 +596,20 @@ def extractor(image_array, mask_array):
             # break
         # print('  ', key, ':', val)
 
+    print('ADDED %s GLDM Features'%len(results))
 
     #
     # Show FirstOrder features, calculated on a LoG filtered image
     #
     if applyLog:
-      sigmaValues = numpy.arange(5., 0., -.5)[::1]
+      sigmaValues = np.arange(5., 0., -.5)[::1]
+      cnt = 0
       for logImage, imageTypeName, inputKwargs in imageoperations.getLoGImage(image, mask, sigma=sigmaValues):
-        logFirstorderFeatures = firstorder.RadiomicsFirstOrder(logImage, mask, **inputKwargs)
-        logFirstorderFeatures.enableAllFeatures()
-        results = logFirstorderFeatures.execute()
+        cnt += 1
+        features = firstorder.RadiomicsFirstOrder(logImage, mask, **inputKwargs)
+        features.enableAllFeatures()
+        results = features.execute()
+        print('ADDEDING %s/%s Features...'%(cnt, len(logImage)))
         for (key, val) in six.iteritems(results):
             laplacianFeatureName = '%s_%s' % (imageTypeName, key)
             if laplacianFeatureName not in feature_vectors:
@@ -615,23 +622,28 @@ def extractor(image_array, mask_array):
     # Show FirstOrder features, calculated on a wavelet filtered image
     #
     if applyWavelet:
-      for decompositionImage, decompositionName, inputKwargs in imageoperations.getWaveletImage(image, mask):
-        waveletFirstOrderFeaturs = firstorder.RadiomicsFirstOrder(decompositionImage, mask, **inputKwargs)
-        waveletFirstOrderFeaturs.enableAllFeatures()
-        results = waveletFirstOrderFeaturs.execute()
-        print('Calculated firstorder features with wavelet ', decompositionName)
-        for (key, val) in six.iteritems(results):
-            waveletFeatureName = '%s_%s' % (str(decompositionName), key)
-            if waveletFeatureName not in feature_vectors:
-                feature_vectors[waveletFeatureName] = val
-            else:
-                print('Error: wavelet key existing! %s'%waveletFeatureName)
-                # break
-            # print('  ', waveletFeatureName, ':', val)
+        cnt = 0
+        for decompositionImage, decompositionName, inputKwargs in imageoperations.getWaveletImage(image, mask):
+            cnt+=1
+            features = firstorder.RadiomicsFirstOrder(decompositionImage, mask, **inputKwargs)
+            features.enableAllFeatures()
+            results = features.execute()
+            print('ADDEDING %s/%s WAVELET Features...'%(cnt, str(decompositionName)))
+            print('Calculated firstorder features with wavelet ', decompositionName)
+            for (key, val) in six.iteritems(results):
+                waveletFeatureName = '%s_%s' % (str(decompositionName), key)
+                if waveletFeatureName not in feature_vectors:
+                    feature_vectors[waveletFeatureName] = val
+                else:
+                    print('Error: wavelet key existing! %s'%waveletFeatureName)
+                    # break
+                # print('  ', waveletFeatureName, ':', val)
 
     mask = None
     image = None
+    features = None
     os.remove(cache_file)
+    print('DONE!')
     return feature_vectors
 # check the required packages to be installed
 # check_requirements()
@@ -656,7 +668,7 @@ def main():
     # valid_IDs = ['01']
     # print('valid_IDs: ',valid_IDs)
 
-    feature_vectors = features_extractor(patients_nrrd_path, valid_IDs)
+    feature_vectors = features_extractor(patients_nrrd_path, valid_IDs, applyLog = False,applyWavelet = False)
     feature_value_array = []
     header = feature_vectors[feature_vectors.keys()[0]].keys()
     feature_value_array . append(['caseID']+header)
